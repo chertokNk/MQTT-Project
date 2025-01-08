@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTTFirstLook.Broker", "MQTTFirstLook.Broker\MQTTFirstLook.Broker.csproj", "{84F9F2D0-9932-4B80-ACF1-1337FCF04D8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Server", "MQTTFirstLook.Broker\MQTT.Server.csproj", "{84F9F2D0-9932-4B80-ACF1-1337FCF04D8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTTFirstLook.Client", "MQTTFirstLook.Client\MQTTFirstLook.Client.csproj", "{1151928A-781A-4C8D-82B8-C23BF9577372}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Client", "MQTTFirstLook.Client\MQTT.Client.csproj", "{1151928A-781A-4C8D-82B8-C23BF9577372}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{84F9F2D0-9932-4B80-ACF1-1337FCF04D8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,5 +41,8 @@ Global
 		{1151928A-781A-4C8D-82B8-C23BF9577372}.Release|x64.Build.0 = Release|Any CPU
 		{1151928A-781A-4C8D-82B8-C23BF9577372}.Release|x86.ActiveCfg = Release|Any CPU
 		{1151928A-781A-4C8D-82B8-C23BF9577372}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
