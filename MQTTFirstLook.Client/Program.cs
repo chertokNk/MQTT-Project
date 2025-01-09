@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Client.Connecting;
@@ -6,6 +7,7 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
+using MQTTnet.Server;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -13,6 +15,7 @@ namespace MQTTFirstLook.Client
 {
     class Program
     {
+        private static int MessageCounter = 0;
         static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -37,20 +40,14 @@ namespace MQTTFirstLook.Client
             mqttClientFactory.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnConnectingFailed);
 
             mqttClientFactory.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(a => {
-                Log.Logger.Information("Message recieved: {payload}", a.ApplicationMessage);
+                string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
+                Log.Logger.Information("Message received: {payload}", payload);
             });
 
             mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
-
-            while (true)
-            {
-                string json = JsonConvert.SerializeObject(new { message = "Heyo :)", sent= DateTimeOffset.UtcNow });
-                mqttClientFactory.SubscribeAsync("dev.to/topic/json");
-
-                Task.Delay(100000).GetAwaiter().GetResult();
-            }
+            mqttClientFactory.SubscribeAsync("info");
+            while (true) ;
         }
-
         public static void OnConnected(MqttClientConnectedEventArgs obj)
         {
             Log.Logger.Information("Successfully connected.");

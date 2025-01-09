@@ -33,8 +33,13 @@ namespace MQTTFirstLook.Broker
             mqttServerFactory.StartAsync(options.Build()).GetAwaiter().GetResult();
             while (true)
             {
-                string json = JsonConvert.SerializeObject(new { message = "Pizza Here :)", sent = DateTimeOffset.UtcNow });
-                mqttServerFactory.PublishAsync("dev.to/topic/json", json);
+                var testmsg = new MqttApplicationMessageBuilder()
+                    .WithTopic("info")
+                    .WithPayload($"Payload:{DateTimeOffset.UtcNow}")
+                    .WithExactlyOnceQoS()
+                    .WithRetainFlag()
+                    .Build();
+                mqttServerFactory.PublishAsync(testmsg);
 
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
