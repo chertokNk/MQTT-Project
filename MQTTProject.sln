@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Server", "MQTTFirstLook.Broker\MQTT.Server.csproj", "{84F9F2D0-9932-4B80-ACF1-1337FCF04D8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Server", "MQTT.Server\MQTT.Server.csproj", "{84F9F2D0-9932-4B80-ACF1-1337FCF04D8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Client", "MQTTFirstLook.Client\MQTT.Client.csproj", "{1151928A-781A-4C8D-82B8-C23BF9577372}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MQTT.Client", "MQTT.Client\MQTT.Client.csproj", "{1151928A-781A-4C8D-82B8-C23BF9577372}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
