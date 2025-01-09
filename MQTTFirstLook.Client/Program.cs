@@ -30,24 +30,24 @@ namespace MQTTFirstLook.Client
                                     .WithClientOptions(builder.Build())
                                     .Build();
 
-            IManagedMqttClient _mqttClient = new MqttFactory().CreateManagedMqttClient();
+            IManagedMqttClient mqttClientFactory = new MqttFactory().CreateManagedMqttClient();
 
-            _mqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate(OnConnected);
-            _mqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate(OnDisconnected);
-            _mqttClient.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnConnectingFailed);
+            mqttClientFactory.ConnectedHandler = new MqttClientConnectedHandlerDelegate(OnConnected);
+            mqttClientFactory.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate(OnDisconnected);
+            mqttClientFactory.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnConnectingFailed);
 
-            _mqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(a => {
+            mqttClientFactory.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(a => {
                 Log.Logger.Information("Message recieved: {payload}", a.ApplicationMessage);
             });
 
-            _mqttClient.StartAsync(options).GetAwaiter().GetResult();
+            mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
 
             while (true)
             {
                 string json = JsonConvert.SerializeObject(new { message = "Heyo :)", sent= DateTimeOffset.UtcNow });
-                _mqttClient.PublishAsync("dev.to/topic/json", json);
+                mqttClientFactory.SubscribeAsync("dev.to/topic/json");
 
-                Task.Delay(1000).GetAwaiter().GetResult();
+                Task.Delay(100000).GetAwaiter().GetResult();
             }
         }
 

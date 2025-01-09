@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Server;
 using Serilog;
+using Newtonsoft.Json;
 
 namespace MQTTFirstLook.Broker
 {
@@ -26,10 +28,16 @@ namespace MQTTFirstLook.Broker
                 .WithApplicationMessageInterceptor(OnNewMessage);
 
 
-            IMqttServer mqttServer = new MqttFactory().CreateMqttServer();
+            IMqttServer mqttServerFactory = new MqttFactory().CreateMqttServer();
 
-            mqttServer.StartAsync(options.Build()).GetAwaiter().GetResult();
-            Console.ReadLine();
+            mqttServerFactory.StartAsync(options.Build()).GetAwaiter().GetResult();
+            while (true)
+            {
+                string json = JsonConvert.SerializeObject(new { message = "Pizza Here :)", sent = DateTimeOffset.UtcNow });
+                mqttServerFactory.PublishAsync("dev.to/topic/json", json);
+
+                Task.Delay(1000).GetAwaiter().GetResult();
+            }
         }
 
         public static void OnNewConnection(MqttConnectionValidatorContext context)
