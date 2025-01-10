@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    container_name: ldap
+    environment:
+        - LDAP_ORGANISATION=chnk
+        - LDAP_DOMAIN=chnk.com
+        - "LDAP_BASE_DN=dc=chnk,dc=com"
+        - LDAP_ADMIN_PASSWORD=chnk
+    ports:
+        - 389:389
+        - 636:636
+
+  mqtt-server:
+    build:
+      context: .
+      dockerfile: MQTT.Server/Dockerfile
+    ports:
+      - "707:707"
+    networks:
+      - mqtt-network
+    container_name: mqtt-server
+
+  mqtt-client:
+    build:
+      context: .
+      dockerfile: MQTT.Client/Dockerfile
+    depends_on:
+      - mqtt-server
+    networks:
+      - mqtt-network
+    environment:
+      - MQTT_SERVER_HOST=mqtt-server
+    container_name: mqtt-client
+
+networks:
+  mqtt-network:
+    driver: bridge 

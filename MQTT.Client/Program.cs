@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
@@ -24,9 +25,11 @@ namespace MQTTFirstLook.Client
                 .WriteTo.Console()
                 .CreateLogger();
 
+            var serverHost = Environment.GetEnvironmentVariable("MQTT_SERVER_HOST") ?? "mqtt-server";
+            
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
-                                        .WithClientId("Dev.To")
-                                        .WithTcpServer("localhost", 707);
+                                        .WithClientId("client")
+                                        .WithTcpServer(serverHost, 707);
 
             ManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder()
                                     .WithAutoReconnectDelay(TimeSpan.FromSeconds(60))
@@ -46,7 +49,8 @@ namespace MQTTFirstLook.Client
 
             mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
             mqttClientFactory.SubscribeAsync("info");
-            while (true) ;
+            Console.WriteLine();
+            while (true);
         }
         public static void OnConnected(MqttClientConnectedEventArgs obj)
         {

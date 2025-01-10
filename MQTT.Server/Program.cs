@@ -24,6 +24,7 @@ namespace MQTTFirstLook.Broker
             MqttServerOptionsBuilder options = new MqttServerOptionsBuilder()
                 .WithDefaultEndpoint()
                 .WithDefaultEndpointPort(707)
+                .WithDefaultEndpointBoundIPAddress(IPAddress.Any)
                 .WithConnectionValidator(OnNewConnection)
                 .WithApplicationMessageInterceptor(OnNewMessage);
 
@@ -64,7 +65,6 @@ namespace MQTTFirstLook.Broker
                 "MessageId: {MessageCounter} - TimeStamp: {TimeStamp} -- Message: ClientId = {clientId}, Topic = {topic}, Payload = {payload}, QoS = {qos}, Retain-Flag = {retainFlag}",
                 MessageCounter,
                 DateTime.Now,
-                context.ClientId,
                 context.ApplicationMessage?.Topic,
                 payload,
                 context.ApplicationMessage?.QualityOfServiceLevel,
