@@ -3,15 +3,19 @@ version: '3.8'
 services:
   ldap:
     image: osixia/openldap:1.5.0
-    container_name: ldap
+    container_name: testldap
     environment:
         - LDAP_ORGANISATION=chnk
         - LDAP_DOMAIN=chnk.com
-        - "LDAP_BASE_DN=dc=chnk,dc=com"
-        - LDAP_ADMIN_PASSWORD=chnk
+        - LDAP_ADMIN_PASSWORD=12345
+        - LDAP_FORCE_RECONFIGURE=true
     ports:
         - 389:389
-        - 636:636
+    volumes:
+         - ldap_data:/var/lib/ldap
+         - ldap_config:/etc/ldap/slapd.d
+         - ./MQTT.Server/ldif/basedata.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/basedata.ldif
+         
 
   mqtt-server:
     build:
@@ -34,7 +38,10 @@ services:
     environment:
       - MQTT_SERVER_HOST=mqtt-server
     container_name: mqtt-client
-
+volumes:
+     ldap_data:
+     ldap_config:
+     
 networks:
   mqtt-network:
     driver: bridge 
