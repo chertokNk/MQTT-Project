@@ -1,0 +1,39 @@
+dn: cn=admin,dc=example,dc=org
+changetype: add
+objectclass: inetOrgPerson
+cn: admin
+sn: Admin
+displayname: Admin
+userpassword: admin_pass
+
+dn: ou=Users,dc=example,dc=org
+changetype: add
+objectclass: organizationalUnit
+ou: Users
+
+dn: uid=user1,ou=Users,dc=example,dc=org
+changetype: add
+objectclass: inetOrgPerson
+uid: user1
+sn: user1
+cn: User 1
+displayName: User 1
+userPassword: 12345
+
+dn: uid=user2,ou=Users,dc=example,dc=org
+changetype: add
+objectclass: inetOrgPerson
+uid: user2
+sn: user2
+cn: User 2
+displayName: User 2
+userPassword: 12345
+
+dn: uid=user3,ou=Users,dc=example,dc=org
+changetype: add
+objectclass: inetOrgPerson
+uid: user3
+sn: user3
+cn: User 3
+displayName: User 3
+userPassword: 12345
