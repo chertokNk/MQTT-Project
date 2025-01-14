@@ -2,11 +2,11 @@ services:
   ldap_server:
     image: osixia/openldap:1.5.0
     environment:
-      LDAP_ADMIN_PASSWORD: admin_pass
-      LDAP_BASE_DN: dc=example,dc=org
-      LDAP_DOMAIN: example.org
-      LDAP_ORGANISATION: "Example Inc."
-    hostname: ldap.example.org
+      LDAP_ADMIN_PASSWORD: 12345
+      LDAP_BASE_DN: dc=chnk,dc=org
+      LDAP_DOMAIN: chnk.org
+      LDAP_ORGANISATION: "LDAP Inc."
+    hostname: ldap.chnk.org
     command: --copy-service
     ports:
       - 389:389

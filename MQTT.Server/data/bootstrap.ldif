@@ -1,4 +1,4 @@
-dn: cn=admin,dc=example,dc=org
+dn: cn=admin,dc=chnk,dc=org
 changetype: add
 objectclass: inetOrgPerson
 cn: admin
@@ -6,12 +6,12 @@ sn: Admin
 displayname: Admin
 userpassword: admin_pass
 
-dn: ou=Users,dc=example,dc=org
+dn: ou=Users,dc=chnk,dc=org
 changetype: add
 objectclass: organizationalUnit
 ou: Users
 
-dn: uid=user1,ou=Users,dc=example,dc=org
+dn: uid=user1,ou=Users,dc=chnk,dc=org
 changetype: add
 objectclass: inetOrgPerson
 uid: user1
@@ -20,7 +20,7 @@ cn: User 1
 displayName: User 1
 userPassword: 12345
 
-dn: uid=user2,ou=Users,dc=example,dc=org
+dn: uid=user2,ou=Users,dc=chnk,dc=org
 changetype: add
 objectclass: inetOrgPerson
 uid: user2
@@ -29,7 +29,7 @@ cn: User 2
 displayName: User 2
 userPassword: 12345
 
-dn: uid=user3,ou=Users,dc=example,dc=org
+dn: uid=user3,ou=Users,dc=chnk,dc=org
 changetype: add
 objectclass: inetOrgPerson
 uid: user3
