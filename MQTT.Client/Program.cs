@@ -11,12 +11,12 @@ using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Server;
 using System.DirectoryServices;
 using Serilog;
+using System.Runtime.CompilerServices;
 
 namespace MQTT.Client
 {
     class Program
     {
-        private static int MessageCounter = 0;
         static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -29,7 +29,7 @@ namespace MQTT.Client
             
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
                                         .WithClientId("client")
-                                        .WithCredentials("user1123", "12345")
+                                        .WithCredentials("user1", "12345")
                                         .WithTcpServer(serverHost, 707);
 
             ManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder()
@@ -51,7 +51,23 @@ namespace MQTT.Client
             mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
             mqttClientFactory.SubscribeAsync("info");
             Console.WriteLine();
-            while (true);
+            //Commands
+            Task.Run(ConsoleInput);
+            //Run, client, run
+            while(true);
+        }
+        private static void ConsoleInput()
+        {
+            while(true)
+            {
+                string input = Console.ReadLine();
+                switch (input.ToLower())
+                {
+                    case "exit":
+                        Environment.Exit(0);
+                        break;
+                }
+            }
         }
         public static void OnConnected(MqttClientConnectedEventArgs obj)
         {

@@ -7,6 +7,7 @@ using MQTTnet.Server;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.Reflection.PortableExecutable;
+using System.IO;
 
 namespace MQTT.Server
 {
@@ -26,8 +27,8 @@ namespace MQTT.Server
                 .WithDefaultEndpoint()
                 .WithDefaultEndpointPort(707)
                 .WithDefaultEndpointBoundIPAddress(IPAddress.Any)
-                .WithConnectionValidator(OnNewConnection)
-                .WithApplicationMessageInterceptor(OnNewMessage);
+                .WithConnectionValidator(OnNewConnection);
+                //.WithApplicationMessageInterceptor(OnNewMessage);
 
 
             IMqttServer mqttServerFactory = new MqttFactory().CreateMqttServer();
@@ -56,12 +57,23 @@ namespace MQTT.Server
                 {
                     ldapConnection.AuthType = AuthType.Basic;
                     ldapConnection.Bind(new NetworkCredential(dn, password));
+                    Log.Logger.Information("User {username} authenticated successfully.", username);
                     return true;
                 }
             }
+            catch (DirectoryNotFoundException ex)
+            {
+                Log.Logger.Error("LDAP server not found: {message}", ex.Message);
+                return false;
+            }
+            catch (LdapException ex)
+            {
+                Log.Logger.Error("LDAP authentication failed for user {username}: {message}", username, ex.Message);
+                return false;
+            }
             catch (Exception ex)
             {
-                Log.Logger.Error("Error during LDAP authentication: {message}", ex.Message);
+                Log.Logger.Error("Error during LDAP authentication: {message}", ex.InnerException?.Message ?? ex.Message);
                 return false;
             }
         }
@@ -80,20 +92,20 @@ namespace MQTT.Server
             Log.Logger.Information($"New connection pperhaps: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, CleanSession = {context.CleanSession},usName = {context.Username}, pass = {context.Password}");
         }
 
-        public static void OnNewMessage(MqttApplicationMessageInterceptorContext context)
-        {
-            var payload = context.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
+        //public static void OnNewMessage(MqttApplicationMessageInterceptorContext context)
+        //{
+        //    var payload = context.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
 
-            MessageCounter++;
+        //    MessageCounter++;
 
-            Log.Logger.Information(
-                "MessageId: {MessageCounter} - TimeStamp: {TimeStamp} -- Message: ClientId = {clientId}, Topic = {topic}, Payload = {payload}, QoS = {qos}, Retain-Flag = {retainFlag}",
-                MessageCounter,
-                DateTime.Now,
-                context.ApplicationMessage?.Topic,
-                payload,
-                context.ApplicationMessage?.QualityOfServiceLevel,
-                context.ApplicationMessage?.Retain);
-        }
+        //    Log.Logger.Information(
+        //        "MessageId: {MessageCounter} - TimeStamp: {TimeStamp} -- Message: ClientId = {clientId}, Topic = {topic}, Payload = {payload}, QoS = {qos}, Retain-Flag = {retainFlag}",
+        //        MessageCounter,
+        //        DateTime.Now,
+        //        context.ApplicationMessage?.Topic,
+        //        payload,
+        //        context.ApplicationMessage?.QualityOfServiceLevel,
+        //        context.ApplicationMessage?.Retain);
+        //}
     }
 }
