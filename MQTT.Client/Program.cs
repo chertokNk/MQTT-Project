@@ -17,8 +17,11 @@ namespace MQTT.Client
 {
     class Program
     {
+        //used to pause messages
+        private static bool messagePause = false;
         static void Main(string[] args)
         {
+            Console.WriteLine("Hint: docker attach mqtt-server");
             //Commands
             Task.Run(() => ConsoleInput());
             //MQTT
@@ -47,8 +50,11 @@ namespace MQTT.Client
             mqttClientFactory.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnConnectingFailed);
 
             mqttClientFactory.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(a => {
-                string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
-                Log.Logger.Information("Message received: {payload}", payload);
+                if(messagePause == false)
+                {
+                    string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
+                    Log.Logger.Information("Message received: {payload}", payload);
+                }
             });
 
             mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
@@ -60,18 +66,23 @@ namespace MQTT.Client
         {
             while(true)
             {
-                Console.WriteLine("Hint: docker attach mqtt-server");
+                
                 string input = Console.ReadLine();
                 switch (input.ToLower())
                 {
-                    case "123":
-                        Console.WriteLine("Why the fuck it isnt worknig");
+                    case "r":
+                        Console.WriteLine("Message Display Resumed");
+                        messagePause = false;
                         break;
                     case "hello":
                         Console.WriteLine("Hello World");
                         break;
                     case "exit":
                         Environment.Exit(0);
+                        break;
+                    case "p":
+                        Console.WriteLine("Message Display Paused");
+                        messagePause = true;
                         break;
                 }
             }

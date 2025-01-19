@@ -42,7 +42,7 @@ namespace MQTT.Server
                     .Build();
                 mqttServerFactory.PublishAsync(testmsg);
 
-                Task.Delay(1000).GetAwaiter().GetResult();
+                Task.Delay(2500).GetAwaiter().GetResult();
             }
         }
         public static bool UserAuth(string username, string password)
