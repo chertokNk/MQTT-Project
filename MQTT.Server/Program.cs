@@ -73,15 +73,11 @@ namespace MQTT.Server
             if (!UserAuth(username, password))
             {
                 context.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.BadUserNameOrPassword;
-                Log.Logger.Warning("Authentication failed for user: {username}", username);
+                Log.Logger.Warning($"Authentication failed for user: {username},{password}");
                 return;
             }
 
-            Log.Logger.Information(
-                    "New connection: ClientId = {clientId}, Endpoint = {endpoint}, CleanSession = {cleanSession}",
-                    context.ClientId,
-                    context.Endpoint,
-                    context.CleanSession);
+            Log.Logger.Information($"New connection pperhaps: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, CleanSession = {context.CleanSession},usName = {context.Username}, pass = {context.Password}");
         }
 
         public static void OnNewMessage(MqttApplicationMessageInterceptorContext context)
