@@ -29,7 +29,10 @@ services:
       - "707:707"
     networks:
       - mqtt-network
+      - default
     container_name: mqtt-server
+    depends_on:
+      - ldap_server
 
   mqtt-client:
     build:

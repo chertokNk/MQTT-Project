@@ -4,7 +4,7 @@ objectclass: inetOrgPerson
 cn: admin
 sn: Admin
 displayname: Admin
-userpassword: admin_pass
+userpassword: 12345
 
 dn: ou=Users,dc=chnk,dc=org
 changetype: add
@@ -16,7 +16,7 @@ changetype: add
 objectclass: inetOrgPerson
 uid: user1
 sn: user1
-cn: User 1
+cn: user1
 displayName: User 1
 userPassword: 12345
 
@@ -25,7 +25,7 @@ changetype: add
 objectclass: inetOrgPerson
 uid: user2
 sn: user2
-cn: User 2
+cn: user2
 displayName: User 2
 userPassword: 12345
 
@@ -34,6 +34,6 @@ changetype: add
 objectclass: inetOrgPerson
 uid: user3
 sn: user3
-cn: User 3
+cn: user3
 displayName: User 3
 userPassword: 12345

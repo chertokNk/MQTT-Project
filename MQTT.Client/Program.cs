@@ -28,8 +28,8 @@ namespace MQTT.Client
             var serverHost = Environment.GetEnvironmentVariable("MQTT_SERVER_HOST") ?? "mqtt-server";
             
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
-                                        .WithClientId("client")
-                                        .WithCredentials("user1", "12345")
+                                        .WithClientId("user1")
+                                        .WithCredentials("user1","12345")
                                         .WithTcpServer(serverHost, 707);
 
             ManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder()

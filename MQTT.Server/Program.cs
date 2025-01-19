@@ -13,9 +13,7 @@ namespace MQTT.Server
 {
     class Program
     {
-        private static int MessageCounter = 0;
-
-        static void Main(string[] args)
+                static void Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -49,15 +47,17 @@ namespace MQTT.Server
         }
         public static bool UserAuth(string username, string password)
         {
-            string ldapHost = "LDAP://localhost:8090";
-            string dn = $"uid={username},ou=Users,dc=chnk,dc=com";
+            string userDn = $"uid={username},ou=Users,dc=chnk,dc=org";
+            
             try
             {
-                using (var ldapConnection = new LdapConnection(new LdapDirectoryIdentifier(ldapHost)))
+                using (var ldapConnection = new LdapConnection(new LdapDirectoryIdentifier("ldap_server", 389)))
                 {
                     ldapConnection.AuthType = AuthType.Basic;
-                    ldapConnection.Bind(new NetworkCredential(dn, password));
-                    Log.Logger.Information("User {username} authenticated successfully.", username);
+                    ldapConnection.SessionOptions.ProtocolVersion = 3;
+                    ldapConnection.SessionOptions.SecureSocketLayer = false;
+                    ldapConnection.Bind(new NetworkCredential(userDn, password));
+                    Log.Logger.Information($"User {username} authenticated successfully");
                     return true;
                 }
             }
@@ -73,7 +73,7 @@ namespace MQTT.Server
             }
             catch (Exception ex)
             {
-                Log.Logger.Error("Error during LDAP authentication: {message}", ex.InnerException?.Message ?? ex.Message);
+                Log.Logger.Error("Error during LDAP authentication: {message}", ex.Message);
                 return false;
             }
         }
