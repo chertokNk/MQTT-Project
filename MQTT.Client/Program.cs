@@ -9,10 +9,10 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Server;
-using Newtonsoft.Json;
+using System.DirectoryServices;
 using Serilog;
 
-namespace MQTTFirstLook.Client
+namespace MQTT.Client
 {
     class Program
     {
@@ -29,6 +29,7 @@ namespace MQTTFirstLook.Client
             
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
                                         .WithClientId("client")
+                                        .WithCredentials("user1123", "12345")
                                         .WithTcpServer(serverHost, 707);
 
             ManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder()

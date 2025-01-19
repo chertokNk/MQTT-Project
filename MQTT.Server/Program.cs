@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Server;
 using Serilog;
-using Newtonsoft.Json;
+using System.DirectoryServices.Protocols;
+using System.Reflection.PortableExecutable;
 
-namespace MQTTFirstLook.Broker
+namespace MQTT.Server
 {
     class Program
     {
@@ -45,9 +46,37 @@ namespace MQTTFirstLook.Broker
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         }
-
+        public static bool UserAuth(string username, string password)
+        {
+            string ldapHost = "LDAP://localhost:8090";
+            string dn = $"uid={username},ou=Users,dc=chnk,dc=com";
+            try
+            {
+                using (var ldapConnection = new LdapConnection(new LdapDirectoryIdentifier(ldapHost)))
+                {
+                    ldapConnection.AuthType = AuthType.Basic;
+                    ldapConnection.Bind(new NetworkCredential(dn, password));
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error("Error during LDAP authentication: {message}", ex.Message);
+                return false;
+            }
+        }
         public static void OnNewConnection(MqttConnectionValidatorContext context)
         {
+            var username = context.Username;
+            var password = context.Password;
+
+            if (!UserAuth(username, password))
+            {
+                context.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.BadUserNameOrPassword;
+                Log.Logger.Warning("Authentication failed for user: {username}", username);
+                return;
+            }
+
             Log.Logger.Information(
                     "New connection: ClientId = {clientId}, Endpoint = {endpoint}, CleanSession = {cleanSession}",
                     context.ClientId,
