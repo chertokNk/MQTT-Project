@@ -38,6 +38,8 @@ services:
     build:
       context: .
       dockerfile: MQTT.Client/Dockerfile
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     depends_on:
       - mqtt-server
     networks:

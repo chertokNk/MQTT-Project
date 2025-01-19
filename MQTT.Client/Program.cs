@@ -19,12 +19,15 @@ namespace MQTT.Client
     {
         static void Main(string[] args)
         {
+            //Commands
+            Task.Run(() => ConsoleInput());
+            //MQTT
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateLogger();
-
+            
             var serverHost = Environment.GetEnvironmentVariable("MQTT_SERVER_HOST") ?? "mqtt-server";
             
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
@@ -50,9 +53,6 @@ namespace MQTT.Client
 
             mqttClientFactory.StartAsync(options).GetAwaiter().GetResult();
             mqttClientFactory.SubscribeAsync("info");
-            Console.WriteLine();
-            //Commands
-            Task.Run(ConsoleInput);
             //Run, client, run
             while(true);
         }
@@ -60,9 +60,16 @@ namespace MQTT.Client
         {
             while(true)
             {
+                Console.WriteLine("Hint: docker attach mqtt-server");
                 string input = Console.ReadLine();
                 switch (input.ToLower())
                 {
+                    case "123":
+                        Console.WriteLine("Why the fuck it isnt worknig");
+                        break;
+                    case "hello":
+                        Console.WriteLine("Hello World");
+                        break;
                     case "exit":
                         Environment.Exit(0);
                         break;
