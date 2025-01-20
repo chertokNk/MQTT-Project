@@ -115,7 +115,7 @@ namespace MQTT.Server
                 switch (input.ToLower())
                 {
                     case "r":
-                        Console.WriteLine("Message Resumed");
+                        Console.WriteLine("Publishing Resumed");
                         publishPause = false;
                         break;
                     case "hello":
@@ -125,7 +125,7 @@ namespace MQTT.Server
                         Environment.Exit(0);
                         break;
                     case "p":
-                        Console.WriteLine("Messages Paused");
+                        Console.WriteLine("Publishing Paused");
                         publishPause = true;
                         break;
                 }
@@ -158,64 +158,41 @@ namespace MQTT.Server
                 using (client)
                 {
                     NetworkStream stream = client.GetStream();
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
 
-                    // Send welcome message
-                    byte[] welcomeMessage = Encoding.UTF8.GetBytes("Welcome to the Telnet server!\n");
-                    await stream.WriteAsync(welcomeMessage, 0, welcomeMessage.Length);
-
-                    string username = await PromptForInput(stream, "Username: ");
-                    string password = await PromptForInput(stream, "Password: ");
+                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Username: "), 0, "Username: ".Length);
+                    string username = await TelnetInput(stream);
+                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Password: "), 0, "Password: ".Length);
+                    string password = await TelnetInput(stream);
 
                     if (!UserAuth(username, password))
                     {
-                        await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed. Goodbye!\n"), 0, 30);
+                        await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed!\n"), 0, "Authentication failed!\n".Length);
                         return;
                     }
-                    try
+                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication successful!\n"), 0, "Authentication successful!\n".Length);
+                    while (true)
                     {
-                        Console.WriteLine("debug"); // got here
-                        string successMessage = "Authentication successful!\n"; // Message to send
-                        await stream.WriteAsync(Encoding.UTF8.GetBytes(successMessage), 0, successMessage.Length);
-                        Console.WriteLine("2 debug"); // but not here
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error sending message: {ex.Message}");
-                        return; // Exit if there's an error
-                    }
-                    while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-                    {
-                        string command = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                        string command = await TelnetInput(stream);
                         Console.WriteLine($"Received command: {command}");
 
-                        // Process commands
                         switch (command.ToLower())
                         {
                             case "exit":
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Goodbye!\n"), 0, 8);
                                 return;
-                            case "hello":
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Server is running.\n"), 0, 22);
-                                break;
                             case "p":
                                 publishPause = true;
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing paused.\n"), 0, 24);
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing paused.\n"), 0, "Publishing paused.\n".Length);
                                 break;
                             case "r":
                                 publishPause = false; 
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing resumed.\n"), 0, 25);
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing resumed.\n"), 0, "Publishing resumed.\n".Length);
                                 break;
                         }
                     }
                 }
             }
-            private async Task<string> PromptForInput(NetworkStream stream, string prompt)
+            private async Task<string> TelnetInput(NetworkStream stream)
             {
-                byte[] promptBytes = Encoding.UTF8.GetBytes(prompt);
-                await stream.WriteAsync(promptBytes, 0, promptBytes.Length);
-
                 byte[] buffer = new byte[1024];
                 int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
