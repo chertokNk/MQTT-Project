@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace MQTT.Server
                 {
                     var testmsg = new MqttApplicationMessageBuilder()
                         .WithTopic("info")
-                        .WithPayload($"Payload:{DateTimeOffset.UtcNow}")
+                        .WithPayload(DumpInfo())
                         .WithExactlyOnceQoS()
                         .WithRetainFlag()
                         .Build();
@@ -54,6 +55,17 @@ namespace MQTT.Server
                     Task.Delay(2500).GetAwaiter().GetResult();
                 }
             }
+        }
+        public static string DumpInfo()
+        {
+            var process = Process.GetCurrentProcess();
+            TimeSpan cpuTime = process.TotalProcessorTime;
+            long memoryUsage = process.WorkingSet64;
+            string dump = 
+                $"CPU Time: {cpuTime.TotalMilliseconds} ms\n" +
+                $"Memory Usage: {memoryUsage / 1024 / 1024} MB\n" +
+                $"{DateTimeOffset.UtcNow}\n";
+            return dump;
         }
         public static bool UserAuth(string username, string password)
         {
