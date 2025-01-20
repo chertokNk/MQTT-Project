@@ -13,6 +13,7 @@ using System.DirectoryServices.Protocols;
 using System.Reflection.PortableExecutable;
 using System.IO;
 using System.Security.AccessControl;
+using System.Net.Sockets;
 
 namespace MQTT.Server
 {
@@ -26,6 +27,7 @@ namespace MQTT.Server
             Console.WriteLine("Use 'connect' to start");
             //Commands
             Task.Run(() => ConsoleInput());
+            Task.Run(() => new TelnetServer(23).StartAsync());
             //MQTT
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
@@ -38,7 +40,6 @@ namespace MQTT.Server
                 .WithDefaultEndpointPort(707)
                 .WithDefaultEndpointBoundIPAddress(IPAddress.Any)
                 .WithConnectionValidator(OnNewConnection);
-                //.WithApplicationMessageInterceptor(OnNewMessage);
 
 
             mqttServer = new MqttFactory().CreateMqttServer();
@@ -113,10 +114,6 @@ namespace MQTT.Server
                 string input = Console.ReadLine();
                 switch (input.ToLower())
                 {
-                    //case "connect":
-                    //    mqttServer.StopAsync();
-                    //    Connect();
-                    //    break;
                     case "r":
                         Console.WriteLine("Message Resumed");
                         publishPause = false;
@@ -134,20 +131,87 @@ namespace MQTT.Server
                 }
             }
         }
-        //public static void OnNewMessage(MqttApplicationMessageInterceptorContext context)
-        //{
-        //    var payload = context.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
+        public class TelnetServer
+        {
+            private readonly int _port;
 
-        //    MessageCounter++;
+            public TelnetServer(int port)
+            {
+                _port = port;
+            }
 
-        //    Log.Logger.Information(
-        //        "MessageId: {MessageCounter} - TimeStamp: {TimeStamp} -- Message: ClientId = {clientId}, Topic = {topic}, Payload = {payload}, QoS = {qos}, Retain-Flag = {retainFlag}",
-        //        MessageCounter,
-        //        DateTime.Now,
-        //        context.ApplicationMessage?.Topic,
-        //        payload,
-        //        context.ApplicationMessage?.QualityOfServiceLevel,
-        //        context.ApplicationMessage?.Retain);
-        //}
+            public async Task StartAsync()
+            {
+                TcpListener listener = new TcpListener(IPAddress.Any, _port);
+                listener.Start();
+                Console.WriteLine($"Telnet server started on port {_port}.");
+
+                while (true)
+                {
+                    var client = await listener.AcceptTcpClientAsync();
+                    _ = HandleClientAsync(client);
+                }
+            }
+
+            private async Task HandleClientAsync(TcpClient client)
+            {
+                using (client)
+                {
+                    NetworkStream stream = client.GetStream();
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+
+                    // Send welcome message
+                    byte[] welcomeMessage = Encoding.UTF8.GetBytes("Welcome to the Telnet server!\n");
+                    await stream.WriteAsync(welcomeMessage, 0, welcomeMessage.Length);
+
+                    string username = await PromptForInput(stream, "Username: ");
+                    string password = await PromptForInput(stream, "Password: ");
+
+                    if (!UserAuth(username, password))
+                    {
+                        await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed. Goodbye!\n"), 0, 30);
+                        return;
+                    }
+                    //something here broke
+                    Console.WriteLine("Hello there debug");//got here
+                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication successful!\n"), 0, 30);
+                    Console.WriteLine("Hello there numba 2 debug");//but ot here
+                    while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                    {
+                        string command = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                        Console.WriteLine($"Received command: {command}");
+
+                        // Process commands
+                        switch (command.ToLower())
+                        {
+                            case "exit":
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Goodbye!\n"), 0, 8);
+                                return;
+                            case "hello":
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Server is running.\n"), 0, 22);
+                                break;
+                            case "p":
+                                publishPause = true;
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing paused.\n"), 0, 24);
+                                break;
+                            case "r":
+                                publishPause = false; 
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing resumed.\n"), 0, 25);
+                                break;
+                        }
+                    }
+                }
+            }
+            private async Task<string> PromptForInput(NetworkStream stream, string prompt)
+            {
+                byte[] promptBytes = Encoding.UTF8.GetBytes(prompt);
+                await stream.WriteAsync(promptBytes, 0, promptBytes.Length);
+
+                byte[] buffer = new byte[1024];
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            }
+        }
     }
 }

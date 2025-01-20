@@ -29,6 +29,7 @@ services:
     tty: true        # docker run -t
     ports:
       - "707:707"
+      - "23:23"
     networks:
       - mqtt-network
       - default
