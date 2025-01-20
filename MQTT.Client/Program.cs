@@ -12,6 +12,8 @@ using MQTTnet.Server;
 using System.DirectoryServices;
 using Serilog;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace MQTT.Client
 {
@@ -19,6 +21,7 @@ namespace MQTT.Client
     {
         //used to pause messages
         private static bool messagePause = false;
+        private static Queue<string> messageBuffer = new Queue<string>();
         static void Main(string[] args)
         {
             Console.WriteLine("Hint: docker attach mqtt-server");
@@ -48,12 +51,17 @@ namespace MQTT.Client
             mqttClientFactory.ConnectedHandler = new MqttClientConnectedHandlerDelegate(OnConnected);
             mqttClientFactory.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate(OnDisconnected);
             mqttClientFactory.ConnectingFailedHandler = new ConnectingFailedHandlerDelegate(OnConnectingFailed);
-
+            
             mqttClientFactory.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(a => {
                 if(messagePause == false)
                 {
                     string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
                     Log.Logger.Information("Message received: {payload}", payload);
+                }
+                else
+                {
+                    string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
+                    messageBuffer.Enqueue($"Buffered message: {payload}");
                 }
             });
 
@@ -72,6 +80,10 @@ namespace MQTT.Client
                 {
                     case "r":
                         Console.WriteLine("Message Display Resumed");
+                        while (messageBuffer.Count > 0)
+                        {
+                            Console.WriteLine(messageBuffer.Dequeue());
+                        }
                         messagePause = false;
                         break;
                     case "hello":
