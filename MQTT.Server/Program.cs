@@ -3,18 +3,30 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
+using MQTTnet.Client.Options;
+using MQTTnet.Client.Receiving;
 using MQTTnet.Server;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.Reflection.PortableExecutable;
 using System.IO;
+using System.Security.AccessControl;
 
 namespace MQTT.Server
 {
     class Program
     {
-                static void Main(string[] args)
+        private static IMqttServer mqttServer;
+        private static bool publishPause = false;
+        static void Main(string[] args)
         {
+            Console.WriteLine("Hint: docker attach mqtt-server");
+            Console.WriteLine("Use 'connect' to start");
+            //Commands
+            Task.Run(() => ConsoleInput());
+            //MQTT
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .Enrich.FromLogContext()
@@ -29,20 +41,23 @@ namespace MQTT.Server
                 //.WithApplicationMessageInterceptor(OnNewMessage);
 
 
-            IMqttServer mqttServerFactory = new MqttFactory().CreateMqttServer();
+            mqttServer = new MqttFactory().CreateMqttServer();
 
-            mqttServerFactory.StartAsync(options.Build()).GetAwaiter().GetResult();
+            mqttServer.StartAsync(options.Build()).GetAwaiter().GetResult();
             while (true)
             {
-                var testmsg = new MqttApplicationMessageBuilder()
-                    .WithTopic("info")
-                    .WithPayload($"Payload:{DateTimeOffset.UtcNow}")
-                    .WithExactlyOnceQoS()
-                    .WithRetainFlag()
-                    .Build();
-                mqttServerFactory.PublishAsync(testmsg);
+                while (!publishPause)
+                {
+                    var testmsg = new MqttApplicationMessageBuilder()
+                        .WithTopic("info")
+                        .WithPayload($"Payload:{DateTimeOffset.UtcNow}")
+                        .WithExactlyOnceQoS()
+                        .WithRetainFlag()
+                        .Build();
+                    mqttServer.PublishAsync(testmsg);
 
-                Task.Delay(2500).GetAwaiter().GetResult();
+                    Task.Delay(2500).GetAwaiter().GetResult();
+                }
             }
         }
         public static bool UserAuth(string username, string password)
@@ -91,7 +106,34 @@ namespace MQTT.Server
 
             Log.Logger.Information($"New connection pperhaps: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, CleanSession = {context.CleanSession},usName = {context.Username}, pass = {context.Password}");
         }
-
+        private static void ConsoleInput()
+        {
+            while (true)
+            {
+                string input = Console.ReadLine();
+                switch (input.ToLower())
+                {
+                    //case "connect":
+                    //    mqttServer.StopAsync();
+                    //    Connect();
+                    //    break;
+                    case "r":
+                        Console.WriteLine("Message Resumed");
+                        publishPause = false;
+                        break;
+                    case "hello":
+                        Console.WriteLine("Hello World");
+                        break;
+                    case "exit":
+                        Environment.Exit(0);
+                        break;
+                    case "p":
+                        Console.WriteLine("Messages Paused");
+                        publishPause = true;
+                        break;
+                }
+            }
+        }
         //public static void OnNewMessage(MqttApplicationMessageInterceptorContext context)
         //{
         //    var payload = context.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
@@ -22,7 +21,7 @@ namespace MQTT.Client
         private static Queue<string> messageBuffer = new Queue<string>();
         static void Main(string[] args)
         {
-            Console.WriteLine("Hint: docker attach mqtt-server");
+            Console.WriteLine("Hint: docker attach mqtt-client");
             Console.WriteLine("Use 'connect' to start");
             //Commands
             Task.Run(() => ConsoleInput());
