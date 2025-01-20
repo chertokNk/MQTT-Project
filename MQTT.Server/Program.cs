@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Server;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.IO;
-using System.Net.Sockets;
 
 namespace MQTT.Server
 {

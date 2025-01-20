@@ -43,12 +43,12 @@ namespace MQTT.Client
                 if (messagePause == false)
                 {
                     string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
-                    Log.Logger.Information($"Message received:\n {payload}");
+                    Log.Logger.Information($"Message received:\n{payload}");
                 }
                 else
                 {
                     string payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
-                    messageBuffer.Enqueue($"Buffered message:\n {payload}");
+                    messageBuffer.Enqueue($"Buffered message:\n{payload}");
                 }
             });
             //Run, client, run
