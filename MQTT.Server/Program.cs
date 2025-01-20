@@ -173,10 +173,18 @@ namespace MQTT.Server
                         await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed. Goodbye!\n"), 0, 30);
                         return;
                     }
-                    //something here broke
-                    Console.WriteLine("Hello there debug");//got here
-                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication successful!\n"), 0, 30);
-                    Console.WriteLine("Hello there numba 2 debug");//but ot here
+                    try
+                    {
+                        Console.WriteLine("debug"); // got here
+                        string successMessage = "Authentication successful!\n"; // Message to send
+                        await stream.WriteAsync(Encoding.UTF8.GetBytes(successMessage), 0, successMessage.Length);
+                        Console.WriteLine("2 debug"); // but not here
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error sending message: {ex.Message}");
+                        return; // Exit if there's an error
+                    }
                     while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
                     {
                         string command = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
