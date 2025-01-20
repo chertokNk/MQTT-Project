@@ -3,16 +3,10 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Server;
 using Serilog;
 using System.DirectoryServices.Protocols;
-using System.Reflection.PortableExecutable;
 using System.IO;
-using System.Security.AccessControl;
 using System.Net.Sockets;
 
 namespace MQTT.Server
@@ -64,9 +58,12 @@ namespace MQTT.Server
         public static bool UserAuth(string username, string password)
         {
             string userDn = $"uid={username},ou=Users,dc=chnk,dc=org";
-            
-            try
+            if (username == "admin")
             {
+                userDn = $"cn={username},dc=chnk,dc=org";
+            }
+            try
+            {  
                 using (var ldapConnection = new LdapConnection(new LdapDirectoryIdentifier("ldap_server", 389)))
                 {
                     ldapConnection.AuthType = AuthType.Basic;
