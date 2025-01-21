@@ -62,7 +62,7 @@ namespace MQTT.Client
             Console.WriteLine("Password: ");
             string password = Console.ReadLine();
             MqttClientOptionsBuilder builder = new MqttClientOptionsBuilder()
-                                        .WithClientId("client")
+                                        .WithClientId(username)
                                         .WithCredentials(username, password)
                                         .WithTcpServer("mqtt-server", 707);
 
@@ -86,6 +86,9 @@ namespace MQTT.Client
                     case "connect":
                         mqttManagedClient.StopAsync();
                         Connect();
+                        break;
+                    case "disconnect":
+                        mqttManagedClient.StopAsync();
                         break;
                     case "r":
                         Console.WriteLine("Message Display Resumed");

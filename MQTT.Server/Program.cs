@@ -4,15 +4,18 @@ using System.Net;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Server;
+using MQTTnet.Server.Status;
+using System.Collections.Generic;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.IO;
+using Microsoft.VisualBasic;
 
 namespace MQTT.Server
 {
     class Program
     {
-        private static IMqttServer mqttServer;
+        internal static IMqttServer mqttServer;
         internal static bool publishPause = false;
         static void Main(string[] args)
         {
@@ -138,7 +141,46 @@ namespace MQTT.Server
                 return;
             }
 
-            Log.Logger.Information($"New connection pperhaps: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, CleanSession = {context.CleanSession},usName = {context.Username}, pass = {context.Password}");
+            Log.Logger.Information($"New connection perhaps: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, CleanSession = {context.CleanSession},usName = {context.Username}, pass = {context.Password}");
+        }
+        internal static async Task GetAllClients()
+        {
+            var clients = await mqttServer.GetClientStatusAsync();
+
+            foreach (var client in clients)
+            {
+                Console.WriteLine($"Client ID: {client.ClientId}");
+                Console.WriteLine($"Endpoint: {client.Endpoint}");
+            }
+
+        }
+        internal static async Task KickAllClients()
+        {
+            var clients = await mqttServer.GetClientStatusAsync();
+
+            foreach (var client in clients)
+            {
+                await client.DisconnectAsync();
+            }
+
+        }
+        internal static async Task KickClient(string kickId)
+        {
+            var clients = await mqttServer.GetClientStatusAsync();
+            try
+            {
+                foreach (var client in clients)
+                {
+                    if (client.ClientId == kickId)
+                    {
+                        await client.DisconnectAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+            }
         }
         private static void ConsoleInput()
         {
@@ -154,7 +196,17 @@ namespace MQTT.Server
                     case "hello":
                         Console.WriteLine("Hello World");
                         break;
-                    case "exit":
+                    case "getall":
+                        GetAllClients().GetAwaiter().GetResult();
+                        break;
+                    case "kickall":
+                        KickAllClients().GetAwaiter().GetResult();
+                        break;
+                    case "kick":
+                        Console.WriteLine("Enter client ID:");
+                        KickClient(Console.ReadLine()).GetAwaiter().GetResult();
+                        break;
+                    case "shutdown":
                         Environment.Exit(0);
                         break;
                     case "p":

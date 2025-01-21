@@ -52,6 +52,9 @@ namespace MQTT.Server
 
                     switch (command.ToLower())
                     {
+                        case "shutdown":
+                            Environment.Exit(0);
+                            break;
                         case "exit":
                             return;
                         case "p":
@@ -61,6 +64,23 @@ namespace MQTT.Server
                         case "r":
                             Program.publishPause = false;
                             await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing resumed.\n"), 0, "Publishing resumed.\n".Length);
+                            break;
+                        case "getall":
+                            var telnetClients = await Program.mqttServer.GetClientStatusAsync();
+
+                            foreach (var c in telnetClients)
+                            {
+
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes($"Client ID: {c.ClientId}\n"), 0, $"Client ID: {c.ClientId}\n".Length);
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes($"Endpoint: {c.Endpoint}\n"), 0, $"Endpoint: {c.Endpoint}\n".Length);
+                            }
+                                break;
+                        case "kickall":
+                            Program.KickAllClients().GetAwaiter().GetResult();
+                            break;
+                        case "kick":
+                            await stream.WriteAsync(Encoding.UTF8.GetBytes("Enter client ID:\n"), 0, "Enter client ID:\n".Length);
+                            Program.KickClient(await TelnetInput(stream)).GetAwaiter().GetResult();
                             break;
                     }
                 }
