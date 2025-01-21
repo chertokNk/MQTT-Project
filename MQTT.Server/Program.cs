@@ -65,7 +65,7 @@ namespace MQTT.Server
                 $"{DateTimeOffset.UtcNow}\n";
             return dump;
         }
-        public static bool UserAuth(string username, string password)
+        public static bool UserAuth(string username, string password, bool if_telnet = false)
         {
             string userDn = $"uid={username},ou=Users,dc=chnk,dc=org";
             if (username == "admin")
@@ -80,23 +80,49 @@ namespace MQTT.Server
                     ldapConnection.SessionOptions.ProtocolVersion = 3;
                     ldapConnection.SessionOptions.SecureSocketLayer = false;
                     ldapConnection.Bind(new NetworkCredential(userDn, password));
-                    Log.Logger.Information($"User {username} authenticated successfully");
-                    return true;
+                    if(if_telnet == true)
+                    {
+                        var request = new SearchRequest(userDn, "(objectClass=*)", SearchScope.Base, new string[] { "employeeType" });
+                        var response = (SearchResponse)ldapConnection.SendRequest(request);
+                        try
+                        {
+                            var employeeType = response.Entries[0].Attributes["employeeType"];
+                            if (employeeType?.Count > 0 && employeeType[0].ToString().Equals("telnet", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                Log.Logger.Warning($"Telnet access denied to {username}");
+                                return false;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Logger.Error($"Error during telnet authentication: {ex.Message}");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Log.Logger.Information($"User {username} authenticated successfully");
+                        return true;
+                    }
                 }
             }
             catch (DirectoryNotFoundException ex)
             {
-                Log.Logger.Error("LDAP server not found: {message}", ex.Message);
+                Log.Logger.Error($"LDAP server not found: {ex.Message}");
                 return false;
             }
             catch (LdapException ex)
             {
-                Log.Logger.Error("LDAP authentication failed for user {username}: {message}", username, ex.Message);
+                Log.Logger.Error($"LDAP authentication failed for user {username}: {ex.Message}");
                 return false;
             }
             catch (Exception ex)
             {
-                Log.Logger.Error("Error during LDAP authentication: {message}", ex.Message);
+                Log.Logger.Error($"Error during LDAP authentication: {ex.Message}");
                 return false;
             }
         }

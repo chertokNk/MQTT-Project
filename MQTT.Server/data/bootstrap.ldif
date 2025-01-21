@@ -5,6 +5,8 @@ cn: admin
 sn: Admin
 displayname: Admin
 userpassword: 12345
+employeeType: telnet
+
 
 dn: ou=Users,dc=chnk,dc=org
 changetype: add

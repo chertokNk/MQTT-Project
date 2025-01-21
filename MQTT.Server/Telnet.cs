@@ -39,7 +39,7 @@ namespace MQTT.Server
                 await stream.WriteAsync(Encoding.UTF8.GetBytes("Password: "), 0, "Password: ".Length);
                 string password = await TelnetInput(stream);
 
-                if (!Program.UserAuth(username, password))
+                if (!Program.UserAuth(username, password, true))
                 {
                     await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed!\n"), 0, "Authentication failed!\n".Length);
                     return;
