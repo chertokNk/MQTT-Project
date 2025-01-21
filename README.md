@@ -30,7 +30,7 @@ Pass: 12345<br>
 Команды сервера<br>
 -------
 Подключение к консоли: docker attach mqtt-server<br>
-Подключение к bash консоли:  docker exec -it mqtt-server /bin/bash<br>
+Подключение к bash:  docker exec -it mqtt-server /bin/bash<br>
 Подключение через telnet: telnet mqtt-server 23<br>
 
 **В консоли:**<br>
