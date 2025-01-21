@@ -65,7 +65,6 @@ namespace MQTT.Client
                                         .WithClientId(username)
                                         .WithCredentials(username, password)
                                         .WithTcpServer("mqtt-server", 707);
-
             ManagedMqttClientOptions options = new ManagedMqttClientOptionsBuilder()
                                     .WithAutoReconnectDelay(TimeSpan.FromSeconds(60))
                                     .WithClientOptions(builder.Build())

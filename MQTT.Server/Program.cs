@@ -4,12 +4,9 @@ using System.Net;
 using System.Threading.Tasks;
 using MQTTnet;
 using MQTTnet.Server;
-using MQTTnet.Server.Status;
-using System.Collections.Generic;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.IO;
-using Microsoft.VisualBasic;
 
 namespace MQTT.Server
 {
