@@ -18,7 +18,7 @@ Pass: 12345<br>
 Команды клиента<br>
 ------
 Подключение к консоли: docker attach mqtt-client<br>
-Подключение к bash:  docker exec -it mqtt-client /bin/bash<br>
+Подключение к bash контейнера:  docker exec -it mqtt-client /bin/bash<br>
 
 **В консоли:**<br>
 Подключение к MQTT серверу: connect<br>
@@ -31,7 +31,7 @@ Pass: 12345<br>
 Команды сервера<br>
 -------
 Подключение к консоли: docker attach mqtt-server<br>
-Подключение к bash:  docker exec -it mqtt-server /bin/bash<br>
+Подключение к bash контейнера:  docker exec -it mqtt-server /bin/bash<br>
 Подключение через telnet из контейнера: telnet mqtt-server 23<br>
 Подключение через telnet извне: telnet localhost 23 (временно не поддерживает powershell,т.к. powershell отправляет данные сразу при нажатии, bash ждет нажатия enter)<br>
 
