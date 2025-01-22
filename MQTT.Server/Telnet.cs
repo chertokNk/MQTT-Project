@@ -41,10 +41,10 @@ namespace MQTT.Server
 
                 if (!Program.UserAuth(username, password, true))
                 {
-                    await ReturnMessage(stream, "Authentication failed!\n");
+                    await ReturnMessage(stream, "Authentication failed!", true);
                     return;
                 }
-                await ReturnMessage(stream, "Authentication successful!\n");
+                await ReturnMessage(stream, "Authentication successful!", true);
                 while (true)
                 {
                     string command = await TelnetInput(stream);
@@ -59,34 +59,39 @@ namespace MQTT.Server
                             return;
                         case "p":
                             Program.publishPause = true;
-                            await ReturnMessage(stream, "Publishing paused.\n");
+                            await ReturnMessage(stream, "Publishing paused.",true);
                             break;
                         case "r":
                             Program.publishPause = false;
-                            await ReturnMessage(stream, "Publishing resumed.\n");
+                            await ReturnMessage(stream, "Publishing resumed.",true);
                             break;
                         case "getall":
                             var telnetClients = await Program.mqttServer.GetClientStatusAsync();
 
                             foreach (var c in telnetClients)
                             {
-                                await ReturnMessage(stream, $"Client ID: {c.ClientId}\n");
-                                await ReturnMessage(stream, $"Endpoint: {c.Endpoint}\n");
+                                await ReturnMessage(stream, $"Client ID: {c.ClientId}",true);
+                                await ReturnMessage(stream, $"Endpoint: {c.Endpoint}",true);
                             }
                             break;
                         case "kickall":
                             Program.KickAllClients().GetAwaiter().GetResult();
                             break;
                         case "kick":
-                            await ReturnMessage(stream, "Enter client ID:\n");
+                            await ReturnMessage(stream, "Enter client ID:");
                             Program.KickClient(await TelnetInput(stream)).GetAwaiter().GetResult();
                             break;
                     }
                 }
             }
         }
-        private static async Task ReturnMessage(NetworkStream stream,string message)
+        private static async Task ReturnMessage(NetworkStream stream,string message,bool newline = false)
         {
+            if (newline)
+            {
+                //using \r\n instead of just \n to support both CRLF and LF
+                message += "\r\n";
+            }
             await stream.WriteAsync(Encoding.UTF8.GetBytes(message, 0, message.Length));
         }
         private async Task<string> TelnetInput(NetworkStream stream)
