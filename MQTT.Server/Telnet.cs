@@ -89,8 +89,22 @@ namespace MQTT.Server
         private async Task<string> TelnetInput(NetworkStream stream)
         {
             byte[] buffer = new byte[1024];
-            int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-            return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            //for powershell compatability using SB instead of writing directly
+            StringBuilder input = new StringBuilder();
+            while (true)
+            {
+                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+                string key = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+
+                if (key.Contains("\r") || key.Contains("\n"))
+                {
+                    input.Append(key.TrimEnd('\r', '\n'));
+                    break;
+                }
+                input.Append(key);
+            }
+            
+            return input.ToString().Trim();
         }
     }
 }
