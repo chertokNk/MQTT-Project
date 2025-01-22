@@ -34,17 +34,17 @@ namespace MQTT.Server
             {
                 NetworkStream stream = client.GetStream();
 
-                await stream.WriteAsync(Encoding.UTF8.GetBytes("Username: "), 0, "Username: ".Length);
+                await ReturnMessage(stream, "Username: ");
                 string username = await TelnetInput(stream);
-                await stream.WriteAsync(Encoding.UTF8.GetBytes("Password: "), 0, "Password: ".Length);
+                await ReturnMessage(stream, "Password: ");
                 string password = await TelnetInput(stream);
 
                 if (!Program.UserAuth(username, password, true))
                 {
-                    await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication failed!\n"), 0, "Authentication failed!\n".Length);
+                    await ReturnMessage(stream, "Authentication failed!\n");
                     return;
                 }
-                await stream.WriteAsync(Encoding.UTF8.GetBytes("Authentication successful!\n"), 0, "Authentication successful!\n".Length);
+                await ReturnMessage(stream, "Authentication successful!\n");
                 while (true)
                 {
                     string command = await TelnetInput(stream);
@@ -59,32 +59,35 @@ namespace MQTT.Server
                             return;
                         case "p":
                             Program.publishPause = true;
-                            await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing paused.\n"), 0, "Publishing paused.\n".Length);
+                            await ReturnMessage(stream, "Publishing paused.\n");
                             break;
                         case "r":
                             Program.publishPause = false;
-                            await stream.WriteAsync(Encoding.UTF8.GetBytes("Publishing resumed.\n"), 0, "Publishing resumed.\n".Length);
+                            await ReturnMessage(stream, "Publishing resumed.\n");
                             break;
                         case "getall":
                             var telnetClients = await Program.mqttServer.GetClientStatusAsync();
 
                             foreach (var c in telnetClients)
                             {
-
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes($"Client ID: {c.ClientId}\n"), 0, $"Client ID: {c.ClientId}\n".Length);
-                                await stream.WriteAsync(Encoding.UTF8.GetBytes($"Endpoint: {c.Endpoint}\n"), 0, $"Endpoint: {c.Endpoint}\n".Length);
+                                await ReturnMessage(stream, $"Client ID: {c.ClientId}\n");
+                                await ReturnMessage(stream, $"Endpoint: {c.Endpoint}\n");
                             }
-                                break;
+                            break;
                         case "kickall":
                             Program.KickAllClients().GetAwaiter().GetResult();
                             break;
                         case "kick":
-                            await stream.WriteAsync(Encoding.UTF8.GetBytes("Enter client ID:\n"), 0, "Enter client ID:\n".Length);
+                            await ReturnMessage(stream, "Enter client ID:\n");
                             Program.KickClient(await TelnetInput(stream)).GetAwaiter().GetResult();
                             break;
                     }
                 }
             }
+        }
+        private static async Task ReturnMessage(NetworkStream stream,string message)
+        {
+            await stream.WriteAsync(Encoding.UTF8.GetBytes(message, 0, message.Length));
         }
         private async Task<string> TelnetInput(NetworkStream stream)
         {
