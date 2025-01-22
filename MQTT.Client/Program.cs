@@ -21,8 +21,8 @@ namespace MQTT.Client
         private static Queue<string> messageBuffer = new Queue<string>();
         static void Main(string[] args)
         {
-            Console.WriteLine("Hint: docker attach mqtt-client");
             Console.WriteLine("Use 'connect' to start");
+            Console.WriteLine("Use 'help' do get a list of all commands");
             //Commands
             Task.Run(() => ConsoleInput());
             //MQTT
@@ -97,15 +97,21 @@ namespace MQTT.Client
                         }
                         messagePause = false;
                         break;
-                    case "hello":
-                        Console.WriteLine("Hello World");
+                    case "p":
+                        Console.WriteLine("Message Display Paused");
+                        messagePause = true;
+                        break;
+                    case "help":
+                        Console.WriteLine("Connect to mqtt server: connect");
+                        Console.WriteLine("Disconnect from mqtt server: disconnect");
+                        Console.WriteLine("Stop/resume displaying messages: p/r");
+                        Console.WriteLine("Stop client: exit");
                         break;
                     case "exit":
                         Environment.Exit(0);
                         break;
-                    case "p":
-                        Console.WriteLine("Message Display Paused");
-                        messagePause = true;
+                    default:
+                        Console.WriteLine("Unknown command");
                         break;
                 }
             }

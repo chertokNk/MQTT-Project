@@ -15,15 +15,14 @@ namespace MQTT.Server
     {
         //Timeout dictionary and default timeout duration
         private static Dictionary<string, DateTime> timeoutDict = new Dictionary<string, DateTime>();
-        private static TimeSpan timeoutDuration = TimeSpan.FromSeconds(30);
+        internal static TimeSpan timeoutDuration = TimeSpan.FromSeconds(30);
         //MQTT server
         internal static IMqttServer mqttServer;
         //variable to pause publishing
         internal static bool publishPause = false;
         static void Main(string[] args)
         {
-            Console.WriteLine("Hint: docker attach mqtt-server");
-            Console.WriteLine("Use 'connect' to start");
+            Console.WriteLine("Use help do get a list of all commands");
             //Commands
             Task.Run(() => ConsoleInput());
             Task.Run(() => new TelnetServer(23).StartAsync());
@@ -232,8 +231,9 @@ namespace MQTT.Server
                         Console.WriteLine("Publishing Resumed");
                         publishPause = false;
                         break;
-                    case "hello":
-                        Console.WriteLine("Hello World");
+                    case "p":
+                        Console.WriteLine("Publishing Paused");
+                        publishPause = true;
                         break;
                     case "getall":
                         GetAllClients().GetAwaiter().GetResult();
@@ -245,12 +245,31 @@ namespace MQTT.Server
                         Console.WriteLine("Enter client ID:");
                         KickClient(Console.ReadLine()).GetAwaiter().GetResult();
                         break;
+                    case "timeout":
+                        Console.WriteLine("Enter timeout duration(seconds)");
+                        Console.WriteLine($"Current: {timeoutDuration}");
+                        try 
+                        { 
+                            timeoutDuration = TimeSpan.FromSeconds(double.Parse(Console.ReadLine()));
+                        }
+                        catch (Exception ex) 
+                        { 
+                            Console.WriteLine($"Error: {ex.Message}"); 
+                        }
+                        break;
+                    case "help":
+                        Console.WriteLine($"Stop publishing/resume publishing: p/r");
+                        Console.WriteLine($"Get all clients: getall");
+                        Console.WriteLine($"Kick client: kick");
+                        Console.WriteLine($"Kick all clients: kickall");
+                        Console.WriteLine($"Change timeout duration: timeout");
+                        Console.WriteLine($"Shutdown server: shutdown");
+                        break;
                     case "shutdown":
                         Environment.Exit(0);
                         break;
-                    case "p":
-                        Console.WriteLine("Publishing Paused");
-                        publishPause = true;
+                    default:
+                        Console.WriteLine("Unknown command");
                         break;
                 }
             }

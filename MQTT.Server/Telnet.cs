@@ -45,6 +45,7 @@ namespace MQTT.Server
                     return;
                 }
                 await ReturnMessage(stream, "Authentication successful!", true);
+                await ReturnMessage(stream, "Use 'help' to get a list of all commands", true);
                 while (true)
                 {
                     string command = await TelnetInput(stream);
@@ -52,11 +53,6 @@ namespace MQTT.Server
 
                     switch (command.ToLower())
                     {
-                        case "shutdown":
-                            Environment.Exit(0);
-                            break;
-                        case "exit":
-                            return;
                         case "p":
                             Program.publishPause = true;
                             await ReturnMessage(stream, "Publishing paused.",true);
@@ -80,6 +76,36 @@ namespace MQTT.Server
                         case "kick":
                             await ReturnMessage(stream, "Enter client ID:");
                             Program.KickClient(await TelnetInput(stream)).GetAwaiter().GetResult();
+                            break;
+                        case "timeout":
+                            await ReturnMessage(stream, "Enter timeout duration(seconds)",true);
+                            await ReturnMessage(stream, $"Current: {Program.timeoutDuration}",true);
+                            try
+                            {
+                                Program.timeoutDuration = TimeSpan.FromSeconds(double.Parse(await TelnetInput(stream)));
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                await ReturnMessage(stream, $"Error: {ex.Message}", true);
+                            }
+                            break;
+                        case "help":
+                            await ReturnMessage(stream, $"Stop publishing/resume publishing: p/r", true);
+                            await ReturnMessage(stream, $"Get all clients: getall", true);
+                            await ReturnMessage(stream, $"Kick client: kick", true);
+                            await ReturnMessage(stream, $"Kick all clients: kickall", true);
+                            await ReturnMessage(stream, $"Change timeout duration: timeout", true);
+                            await ReturnMessage(stream, $"Close telnet connection: exit", true);
+                            await ReturnMessage(stream, $"Shutdown server: shutdown", true);
+                            break;
+                        case "shutdown":
+                            Environment.Exit(0);
+                            break;
+                        case "exit":
+                            return;
+                        default:
+                            await ReturnMessage(stream, "Unknown command", true);
                             break;
                     }
                 }
