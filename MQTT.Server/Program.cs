@@ -7,12 +7,18 @@ using MQTTnet.Server;
 using Serilog;
 using System.DirectoryServices.Protocols;
 using System.IO;
+using System.Collections.Generic;
 
 namespace MQTT.Server
 {
     class Program
     {
+        //Timeout dictionary and default timeout duration
+        private static Dictionary<string, DateTime> timeoutDict = new Dictionary<string, DateTime>();
+        private static TimeSpan timeoutDuration = TimeSpan.FromSeconds(30);
+        //MQTT server
         internal static IMqttServer mqttServer;
+        //variable to pause publishing
         internal static bool publishPause = false;
         static void Main(string[] args)
         {
@@ -76,10 +82,25 @@ namespace MQTT.Server
             {  
                 using (var ldapConnection = new LdapConnection(new LdapDirectoryIdentifier("ldap_server", 389)))
                 {
+                    //timeout check, mqtt only
+                    if (timeoutDict.ContainsKey(username) && if_telnet == false)
+                    {
+                        if (DateTime.Now - timeoutDict[username] < timeoutDuration )
+                        {
+                            Log.Logger.Warning($"User {username} denied access due to timeout");
+                            return false;
+                        }
+                        else
+                        {
+                            timeoutDict.Remove(username);
+                        }
+                    }
+                    //general LDAP auth
                     ldapConnection.AuthType = AuthType.Basic;
                     ldapConnection.SessionOptions.ProtocolVersion = 3;
                     ldapConnection.SessionOptions.SecureSocketLayer = false;
                     ldapConnection.Bind(new NetworkCredential(userDn, password));
+                    //telnet connection auth
                     if(if_telnet == true)
                     {
                         var request = new SearchRequest(userDn, "(objectClass=*)", SearchScope.Base, new string[] { "employeeType" });
@@ -103,6 +124,7 @@ namespace MQTT.Server
                             return false;
                         }
                     }
+                    //mqtt connection, no extra auth
                     else
                     {
                         Log.Logger.Information($"User {username} authenticated successfully");
@@ -133,7 +155,7 @@ namespace MQTT.Server
 
             if (!UserAuth(username, password))
             {
-                context.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.BadUserNameOrPassword;
+                context.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.NotAuthorized;
                 Log.Logger.Warning($"Authentication failed for user: {username},{password}");
                 return;
             }
@@ -157,6 +179,16 @@ namespace MQTT.Server
 
             foreach (var client in clients)
             {
+                //timeout
+                if (timeoutDict.ContainsKey(client.ClientId))
+                {
+                    timeoutDict[client.ClientId] = DateTime.Now;
+                }
+                else
+                {
+                    timeoutDict.Add(client.ClientId, DateTime.Now);
+                }
+                //dc
                 await client.DisconnectAsync();
             }
 
@@ -170,6 +202,16 @@ namespace MQTT.Server
                 {
                     if (client.ClientId == kickId)
                     {
+                        //timeout
+                        if (timeoutDict.ContainsKey(client.ClientId))
+                        {
+                            timeoutDict[client.ClientId] = DateTime.Now;
+                        }
+                        else
+                        {
+                            timeoutDict.Add(client.ClientId, DateTime.Now);
+                        }
+                        //dc
                         await client.DisconnectAsync();
                     }
                 }
