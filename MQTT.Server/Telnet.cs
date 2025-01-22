@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace MQTT.Server
 {
-    public class TelnetServer
+    internal class TelnetServer
     {
         private readonly int _port;
 
-        public TelnetServer(int port)
+        internal TelnetServer(int port)
         {
             _port = port;
         }
 
-        public async Task StartAsync()
+        internal async Task StartAsync()
         {
             TcpListener listener = new TcpListener(IPAddress.Any, _port);
             listener.Start();

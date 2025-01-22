@@ -54,7 +54,7 @@ namespace MQTT.Server
                 }
             }
         }
-        public static string DumpInfo()
+        private static string DumpInfo()
         {
             var process = Process.GetCurrentProcess();
             TimeSpan cpuTime = process.TotalProcessorTime;
@@ -65,7 +65,7 @@ namespace MQTT.Server
                 $"{DateTimeOffset.UtcNow}\n";
             return dump;
         }
-        public static bool UserAuth(string username, string password, bool if_telnet = false)
+        internal static bool UserAuth(string username, string password, bool if_telnet = false)
         {
             string userDn = $"uid={username},ou=Users,dc=chnk,dc=org";
             if (username == "admin")
@@ -126,7 +126,7 @@ namespace MQTT.Server
                 return false;
             }
         }
-        public static void OnNewConnection(MqttConnectionValidatorContext context)
+        private static void OnNewConnection(MqttConnectionValidatorContext context)
         {
             var username = context.Username;
             var password = context.Password;
