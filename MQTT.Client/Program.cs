@@ -110,17 +110,17 @@ namespace MQTT.Client
                 }
             }
         }
-        public static void OnConnected(MqttClientConnectedEventArgs obj)
+        private static void OnConnected(MqttClientConnectedEventArgs obj)
         {
             Log.Logger.Information("Successfully connected.");
         }
 
-        public static void OnConnectingFailed(ManagedProcessFailedEventArgs obj)
+        private static void OnConnectingFailed(ManagedProcessFailedEventArgs obj)
         {
             Log.Logger.Warning("Couldn't connect to broker.");
         }
 
-        public static void OnDisconnected(MqttClientDisconnectedEventArgs obj)
+        private static void OnDisconnected(MqttClientDisconnectedEventArgs obj)
         {
             Log.Logger.Information("Successfully disconnected.");
         }
